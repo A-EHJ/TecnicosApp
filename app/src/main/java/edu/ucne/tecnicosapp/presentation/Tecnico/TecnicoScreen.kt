@@ -11,13 +11,11 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
@@ -25,15 +23,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ucne.myapplication.data.local.entities.TecnicoEntity
-import edu.ucne.tecnicosapp.MainActivity
-import edu.ucne.tecnicosapp.ui.theme.TecnicosAppTheme
+
+
+
 
 
 @Composable
@@ -42,6 +41,7 @@ fun TecnicoScreen(
 ) {
     val tecnicos by viewModel.tecnicos.collectAsStateWithLifecycle()
     TecnicoBody(
+        tecnicos = tecnicos,
         onSaveTecnico = { tecnico ->
             viewModel.saveTecnico(tecnico)
         }
@@ -49,14 +49,17 @@ fun TecnicoScreen(
 }
 
 @Composable
-fun TecnicoBody(onSaveTecnico: (TecnicoEntity) -> Unit) {
-    val regex = Regex("[0-9]*\\.?[0-9]*")
+fun TecnicoBody(tecnicos: List<TecnicoEntity>,onSaveTecnico: (TecnicoEntity) -> Unit) {
+    val regexSueldo = Regex("[0-9]*\\.?[0-9]*")
+    val regexNombre = Regex("^[a-zA-Z ]+\$")
     var tecnicoId by remember { mutableStateOf("") }
     var nombres by remember { mutableStateOf("") }
     var sueldoHora by remember { mutableDoubleStateOf(0.0) }
-    var showDiagSaveError by remember { mutableStateOf(false) }
+    var nombreValido by remember { mutableStateOf(true) }
+    var sueldoValido by remember { mutableStateOf(true) }
+    var nombreExiste by remember { mutableStateOf(false) }
 
-
+    val context = LocalContext.current
     ElevatedCard(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -65,26 +68,41 @@ fun TecnicoBody(onSaveTecnico: (TecnicoEntity) -> Unit) {
                 .fillMaxWidth()
                 .padding(8.dp)
         ) {
-
-
             OutlinedTextField(
                 label = { Text(text = "Nombres") },
                 value = nombres,
-                onValueChange = { nombres = it },
+                onValueChange = {if (it.matches(regexNombre) || it.isEmpty()) {
+                    nombres = it
+                }},
+                isError = !nombreValido || nombreExiste,
                 keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
                 modifier = Modifier.fillMaxWidth()
             )
 
+
+            if (!nombreValido) {
+                Text(text = "Debe agregar un nombre", color = Color.Red)
+                }
+            if (nombreExiste) {
+                Text(text = "El nombre ya existe", color = Color.Red)
+            }
+
+
             OutlinedTextField(
                 label = { Text(text = "Sueldo por hora") },
                 value = sueldoHora.toString(),
-                onValueChange = {if (it.matches(regex)) {
+                onValueChange = {if (it.matches(regexSueldo) ) {
                     sueldoHora = it.toDoubleOrNull() ?: 0.0
                 }},
+                isError = !nombreValido,
                 modifier = Modifier
                     .fillMaxWidth(),
                 keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
             )
+
+            if (!sueldoValido) {
+                Text(text = "El sueldo debe ser mayor a 0", color = Color.Red)
+            }
 
             Spacer(modifier = Modifier.padding(2.dp))
             Row(
@@ -96,6 +114,9 @@ fun TecnicoBody(onSaveTecnico: (TecnicoEntity) -> Unit) {
                         tecnicoId = ""
                         nombres = ""
                         sueldoHora = 0.0
+                        nombreValido = true
+                        sueldoValido = true
+                        nombreExiste = false
                     }
                 ) {
                     Icon(
@@ -107,11 +128,21 @@ fun TecnicoBody(onSaveTecnico: (TecnicoEntity) -> Unit) {
                 OutlinedButton(
                     onClick = {
 
-                        if (ValidarTecnico(nombres, sueldoHora))
-                        {
-                            showDiagSaveError = true
+                        val (tecnicoEsValido, nombreValidoResult, sueldoValidoResult) = validarTecnico(nombres, sueldoHora)
+
+                        if (!tecnicoEsValido) {
+                            nombreValido = nombreValidoResult
+                            sueldoValido = sueldoValidoResult
                             return@OutlinedButton
                         }
+
+                        if (existeNombreTecnico(nombres, tecnicos)) {
+                            nombreExiste = true
+                            return@OutlinedButton
+                        }
+                        else
+                            nombreExiste = false
+
                         onSaveTecnico(
                             TecnicoEntity(
                                 tecnicoId = tecnicoId.toIntOrNull(),
@@ -122,6 +153,10 @@ fun TecnicoBody(onSaveTecnico: (TecnicoEntity) -> Unit) {
                         tecnicoId = ""
                         nombres = ""
                         sueldoHora = 0.0
+                        nombreValido = true
+                        sueldoValido = true
+                        nombreExiste = false
+                        Toast.makeText(context, "Tecnico agregado", Toast.LENGTH_SHORT).show()
                     }
                 ) {
                     Icon(
@@ -131,25 +166,9 @@ fun TecnicoBody(onSaveTecnico: (TecnicoEntity) -> Unit) {
                     Text(text = "Guardar")
                 }
 
-                if (showDiagSaveError) {
-
-                    AlertDialog(
-                        onDismissRequest = { showDiagSaveError = false },
-                        title = { Text("Error al guardar") },
-                        text = { Text(mensajeDeValidacion(nombres, sueldoHora)) },
-                        confirmButton = {
-                            TextButton(
-                                onClick = {
-                                    showDiagSaveError = false
-                                }
-                            ) {
-                                Text("Aceptar")
-                            }
-                        }
-                    )
-                }
 
             }
+
         }
 
     }
@@ -157,47 +176,46 @@ fun TecnicoBody(onSaveTecnico: (TecnicoEntity) -> Unit) {
 }
 
 
-private fun ValidarTecnico(nombres: String, sueldoHora: Double): Boolean {
+private fun validarTecnico(nombres: String, sueldoHora: Double): Triple<Boolean, Boolean, Boolean> {
+    var tecnicoEsValido = true
+    val nombreValidoResult: Boolean
+    val sueldoValidoResult: Boolean
+
     if (nombres.isEmpty()) {
-        return true
+        nombreValidoResult = false
+        tecnicoEsValido = false
+    } else {
+        nombreValidoResult = true
     }
-    if (ValidarNombreSoloCaracteres(nombres)) {
-        return true
+
+    if (tecnicoEsValido && sonLetrasYEspacios(nombres)) {
+        tecnicoEsValido = false
     }
-    if (sueldoHora <= 0) {
-        return true
+    if (sueldoHora <= 0.0) {
+        sueldoValidoResult = false
+        tecnicoEsValido = false
+    } else {
+        sueldoValidoResult = true
     }
-    return false
+
+    return Triple(tecnicoEsValido, nombreValidoResult, sueldoValidoResult)
 }
 
-private fun ValidarNombreSoloCaracteres(nombre: String): Boolean {
-    val regex = Regex("^[a-zA-Z ]+\$")
-    if (!regex.matches(nombre)) {
 
-        return true
-    }
-    return false
+
+private fun sonLetrasYEspacios(nombre: String): Boolean {
+    val regexNombre = Regex("^[a-zA-Z ]+\$")
+    return !regexNombre.matches(nombre)
 }
 
-private fun mensajeDeValidacion(nombres: String, SueldoHora: Double): String{
-    var mensaje = ""
-    if (nombres.isEmpty()) {
-        mensaje += "Debe ingresar un nombre"
-    }
-    if (ValidarNombreSoloCaracteres(nombres)) {
-        mensaje += "\nEl nombre solo puede contener letras"
-    }
-    if (SueldoHora <= 0) {
-        mensaje += "\nEl sueldo por hora debe ser mayor a 0"
-    }
-    return mensaje
-}
-
-@Preview
-@Composable
-private fun TecnicoPreview() {
-    TecnicosAppTheme {
-        TecnicoBody() {
+private fun existeNombreTecnico (nombre: String, tecnicos: List<TecnicoEntity>): Boolean {
+    for (tecnico in tecnicos) {
+        if (tecnico.nombres == nombre) {
+            return true
         }
     }
+    return false
 }
+
+
+
