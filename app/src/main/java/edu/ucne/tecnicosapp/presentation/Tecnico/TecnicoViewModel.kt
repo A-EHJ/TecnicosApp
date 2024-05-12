@@ -25,6 +25,11 @@ class TecnicoViewModel(private val repository: TecnicoRepository) : ViewModel() 
         }
     }
 
+    fun deleteTecnico(tecnico: TecnicoEntity) {
+        viewModelScope.launch {
+            repository.deleteTecnico(tecnico)
+        }
+    }
 
     companion object {
         fun provideFactory(
