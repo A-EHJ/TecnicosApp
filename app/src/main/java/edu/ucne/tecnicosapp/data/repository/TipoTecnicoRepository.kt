@@ -8,7 +8,9 @@ class TipoTecnicoRepository(private val tipoTecnicodao: TipoTecnicoDao) {
 
     fun getTipoTecnicos() = tipoTecnicodao.getAll()
 
-    suspend fun deleteTipoTecnico(tipoTecnico: TipoTecnicoEntity) = tipoTecnicodao.delete(tipoTecnico)
+    suspend fun deleteTipoTecnico(tipoTecnico: TipoTecnicoEntity) =
+        tipoTecnicodao.delete(tipoTecnico)
+
     suspend fun deleteTipoTecnico(id: Int) = tipoTecnicodao.find(id).let { tecnico ->
         tecnico?.let { tipoTecnicodao.delete(it) }
     }
@@ -21,7 +23,9 @@ class TipoTecnicoRepository(private val tipoTecnicodao: TipoTecnicoDao) {
             }
         }
     }
-    suspend fun getTipoTecnico(tipoTecnicoId:Int) = tipoTecnicodao.find(tipoTecnicoId)
-    
+
+    suspend fun getTipoTecnico(tipoTecnicoId: Int) = tipoTecnicodao.find(tipoTecnicoId)
+
+    suspend fun getTipoTecnico(descripcion: String, tipoTecnicoId: Int) = tipoTecnicodao.find(descripcion.toLowerCase().replace(" ", ""), tipoTecnicoId)
 
 }

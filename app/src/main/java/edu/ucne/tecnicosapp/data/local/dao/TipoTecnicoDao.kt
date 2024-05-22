@@ -22,6 +22,18 @@ interface TipoTecnicoDao {
     )
     suspend fun find(id: Int): TipoTecnicoEntity?
 
+
+    @Query(
+        """
+        SELECT * 
+        FROM TipoTecnico 
+        WHERE descripcion=:descripcion AND tipoTecnicoId!=:tipoTecnicoId
+        LIMIT 1
+        """
+    )
+    suspend fun find(descripcion: String, tipoTecnicoId: Int): TipoTecnicoEntity?
+
+
     @Delete
     suspend fun delete(tipoTecnico: TipoTecnicoEntity)
 

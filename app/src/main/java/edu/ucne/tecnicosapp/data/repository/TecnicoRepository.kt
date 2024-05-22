@@ -21,7 +21,12 @@ class TecnicoRepository(private val tecnicoDao: TecnicoDao) {
             }
         }
     }
-    suspend fun getTecnico(tecnicoId:Int) = tecnicoDao.find(tecnicoId)
-    
+
+    suspend fun getTecnico(tecnicoId: Int) = tecnicoDao.find(tecnicoId)
+
+    suspend fun getTecnico(nombres: String, tecnicoId: Int) = tecnicoDao.find(nombres, tecnicoId)
+
+
+
 
 }

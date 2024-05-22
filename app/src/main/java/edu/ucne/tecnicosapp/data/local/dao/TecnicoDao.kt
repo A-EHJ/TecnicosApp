@@ -22,6 +22,17 @@ interface TecnicoDao {
     )
     suspend fun find(id: Int): TecnicoEntity?
 
+    @Query(
+        """
+        SELECT * 
+        FROM Tecnico 
+        WHERE nombres=:nombres AND tecnicoId!=:tecnicoId
+        LIMIT 1
+        """
+    )
+    suspend fun find(nombres: String, tecnicoId: Int): TecnicoEntity?
+
+
     @Delete
     suspend fun delete(tecnico: TecnicoEntity)
 

@@ -1,9 +1,8 @@
-package edu.ucne.tecnicosapp.presentation.Tecnico
+package edu.ucne.tecnicosapp.presentation.TipoTecnico
 
 
 import android.content.Context
 import android.widget.Toast
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -41,31 +40,32 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import edu.ucne.tecnicosapp.data.local.entities.TecnicoEntity
+import edu.ucne.tecnicosapp.data.local.entities.TipoTecnicoEntity
 import edu.ucne.tecnicosapp.presentation.Component.FloatingActionButtonSimple
+import edu.ucne.tecnicosapp.presentation.Tecnico.TopAppBar
 import edu.ucne.tecnicosapp.ui.theme.TecnicosAppTheme
 
 
 @Composable
-fun TecnicoListScreen(
-    viewModel: TecnicoViewModel,
-    onVerTecnico: (TecnicoEntity) -> Unit
+fun TipoTecnicoListScreen(
+    viewModel: TipoTecnicoViewModel,
+    onVerTipoTecnico: (TipoTecnicoEntity) -> Unit
 ) {
-    val tecnicos by viewModel.tecnicos.collectAsStateWithLifecycle()
-    TecnicoListBody(
-        tecnicos = tecnicos,
-        onVerTecnico = onVerTecnico,
-        eliminarTecnico = { tecnico ->
-            viewModel.deleteTecnico(tecnico.tecnicoId ?: 0)
+    val tipoTecnicos by viewModel.TipoTecnicos.collectAsStateWithLifecycle()
+    TipoTecnicoListBody(
+        tipoTecnicos = tipoTecnicos,
+        onVerTipoTecnico = onVerTipoTecnico,
+        eliminarTipoTecnico = { tipoTecnico ->
+            viewModel.deleteTipoTecnico(tipoTecnico.tipoTecnicoId ?: 0)
         }
     )
 }
 
 @Composable
-fun TecnicoListBody(
-    tecnicos: List<TecnicoEntity>,
-    onVerTecnico: (TecnicoEntity) -> Unit,
-    eliminarTecnico: (TecnicoEntity) -> Unit
+fun TipoTecnicoListBody(
+    tipoTecnicos: List<TipoTecnicoEntity>,
+    onVerTipoTecnico: (TipoTecnicoEntity) -> Unit,
+    eliminarTipoTecnico: (TipoTecnicoEntity) -> Unit
 ) {
     var showDeleteModeDialog by remember { mutableStateOf(false) }
     var modoEliminarOn by remember { mutableStateOf(false) }
@@ -73,21 +73,19 @@ fun TecnicoListBody(
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        topBar = { TopAppBar(title = "Tecnicos") },
+        topBar = { TopAppBar(title = "Tipo de Tecnicos") },
         floatingActionButton = {
             FloatingActionButtonSimple(
                 onClick = {
-                    onVerTecnico(
-                        TecnicoEntity(
-                            tecnicoId = null,
-                            nombres = "",
-                            sueldoHora = 0.0
+                    onVerTipoTecnico(
+                        TipoTecnicoEntity(
+                            tipoTecnicoId = null,
+                            descripcion = ""
                         )
                     )
                 }
             )
-        }
-    ) { innerPadding ->
+        }) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -97,7 +95,7 @@ fun TecnicoListBody(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color(0xFFE0E0E0))
+
             ) {
                 Spacer(
                     modifier = Modifier
@@ -110,25 +108,22 @@ fun TecnicoListBody(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Absolute.Right
 
+
                 ) {
                     Text(
                         text = "ID",
                         modifier = Modifier
                             .weight(0.10f),
-                        textAlign = androidx.compose.ui.text.style.TextAlign.Right
-                    )
-                    Text(
-                        text = "Nombres",
-                        modifier = Modifier
-                            .weight(0.40f).padding(start = 10.dp)
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
 
                     )
+
                     Text(
-                        text = "Sueldo",
+                        text = "Descripción",
                         modifier = Modifier
                             .weight(0.40f)
-                            .weight(0.40f).padding(start = 10.dp)
                     )
+
 
                     IconButton(onClick = {
                         if (!modoEliminarOn) {
@@ -152,8 +147,14 @@ fun TecnicoListBody(
                 modifier = Modifier
                     .fillMaxSize()
             ) {
-                items(tecnicos) { tecnico ->
-                    TecnicoRow(onVerTecnico, tecnico, modoEliminarOn, eliminarTecnico, context)
+                items(tipoTecnicos) { tecnico ->
+                    TecnicoRow(
+                        onVerTipoTecnico,
+                        tecnico,
+                        modoEliminarOn,
+                        eliminarTipoTecnico,
+                        context
+                    )
                 }
             }
         }
@@ -212,15 +213,15 @@ fun TecnicoListBody(
 
 @Composable
 private fun TecnicoRow(
-    onVerTecnico: (TecnicoEntity) -> Unit,
-    tecnico: TecnicoEntity,
+    onVerTipoTecnico: (TipoTecnicoEntity) -> Unit,
+    tipoTecnico: TipoTecnicoEntity,
     modoEliminarOn: Boolean,
-    eliminarTecnico: (TecnicoEntity) -> Unit,
+    eliminarTipoTecnico: (TipoTecnicoEntity) -> Unit,
     context: Context
 ) {
     Box(modifier = Modifier
         .fillMaxWidth()
-        .clickable { onVerTecnico(tecnico) }
+        .clickable { onVerTipoTecnico(tipoTecnico) }
         .padding(4.dp)
     ) {
         Row(
@@ -229,18 +230,14 @@ private fun TecnicoRow(
                 .padding(16.dp)
 
         ) {
-            Text(text = tecnico.tecnicoId.toString(), modifier = Modifier.weight(0.10f))
-            Text(text = tecnico.nombres, modifier = Modifier.weight(0.400f))
-            Text(
-                text = tecnico.sueldoHora.toString(),
-                modifier = Modifier.weight(0.40f)
-            )
+            Text(text = tipoTecnico.tipoTecnicoId.toString(), modifier = Modifier.weight(0.10f))
+            Text(text = tipoTecnico.descripcion, modifier = Modifier.weight(0.400f))
             if (modoEliminarOn)
 
                 IconButton(
                     onClick = {
-                        eliminarTecnico(tecnico)
-                        Toast.makeText(context, "Tecnico eliminado", Toast.LENGTH_SHORT)
+                        eliminarTipoTecnico(tipoTecnico)
+                        Toast.makeText(context, "Tipo de Tecnico eliminado", Toast.LENGTH_SHORT)
                             .show()
                     },
                     modifier = Modifier.height(23.dp),
@@ -260,22 +257,23 @@ private fun TecnicoRow(
 @Composable
 private fun PreviewTecnicoListBody() {
     val lista = listOf(
-        TecnicoEntity(
-            tecnicoId = 1,
-            nombres = "Juan Perez",
-            sueldoHora = 100.0
+        TipoTecnicoEntity(
+            tipoTecnicoId = 1,
+            descripcion = "Tecnico en sistemas"
         ),
-        TecnicoEntity(
-            tecnicoId = 2,
-            nombres = "Pedro Perez",
-            sueldoHora = 200.0
-        )
+        TipoTecnicoEntity(
+            tipoTecnicoId = 2,
+            descripcion = "Tecnico en redes"
+        ),
     )
+
+
     TecnicosAppTheme {
-        TecnicoListBody(
-            tecnicos = lista,
-            onVerTecnico = {},
-            eliminarTecnico = {}
+
+        TipoTecnicoListBody(
+            tipoTecnicos = lista,
+            onVerTipoTecnico = {},
+            eliminarTipoTecnico = {}
         )
     }
 }

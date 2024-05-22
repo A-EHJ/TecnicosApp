@@ -13,6 +13,9 @@ import kotlinx.coroutines.launch
 class TecnicoViewModel(private val repository: TecnicoRepository, private val TecnicoId: Int) :
     ViewModel() {
 
+    val regexSueldoHora = Regex("^[0-9]{0,7}(\\.[0-9]{0,2})?$")
+    val regexNombre: Regex = Regex("^[a-zA-Z]+(?: [a-zA-Z]+)*$")
+
     var uiState = MutableStateFlow(TecnicoUIState())
         private set
 
@@ -22,8 +25,6 @@ class TecnicoViewModel(private val repository: TecnicoRepository, private val Te
             started = SharingStarted.WhileSubscribed(5_000),
             initialValue = emptyList()
         )
-
-    val regexNombre: Regex = Regex("^[a-zA-Z]+(?: [a-zA-Z]+)*$")
 
 
     fun deleteTecnico() {
@@ -50,10 +51,8 @@ class TecnicoViewModel(private val repository: TecnicoRepository, private val Te
     }
 
     fun onSueldoHoraChanged(sueldoHoraStr: String) {
-        val regex = Regex("[0-9]*\\.?[0-9]{0,2}")
-        if (sueldoHoraStr.matches(regex)) {
-            val sueldoHora =
-                if (sueldoHoraStr == "") null else sueldoHoraStr.toDoubleOrNull() ?: 0.0
+        if (sueldoHoraStr.matches(regexSueldoHora)) {
+            val sueldoHora = sueldoHoraStr.toDoubleOrNull() ?: 0.0
             uiState.update {
                 it.copy(
                     sueldoHora = sueldoHora,
@@ -61,6 +60,7 @@ class TecnicoViewModel(private val repository: TecnicoRepository, private val Te
             }
         }
     }
+
 
     init {
         viewModelScope.launch {
@@ -79,61 +79,86 @@ class TecnicoViewModel(private val repository: TecnicoRepository, private val Te
     }
 
     fun saveTecnico() {
-        fun saveTecnico() {
-            viewModelScope.launch {
-                uiState.update {
-                    it.copy(nombresError = null, sueldoError = null)
-                }.let {
-                    var valido = true
-                    if (uiState.value.nombres.isEmpty()) {
-                        uiState.update {
-                            it.copy(nombresError = "El nombre no puede estar vacío")
-                        }
-                        valido = false
-                    }
-                    if (uiState.value.sueldoHora == 0.0) {
-                        uiState.update {
-                            it.copy(sueldoError = "El sueldo no puede ser 0")
-                        }
-                        valido = false
-                    }
+        // Reset errors
+        uiState.update {
+            it.copy(nombresError = null, sueldoError = null)
+        }
 
-
-                    if (!valido) {
-                        return@launch // Correct way to exit the coroutine early
-                    }
-
-
-
-                    if (uiState.value.sueldoError == null && uiState.value.nombresError == null) {
-                        repository.saveTecnico(uiState.value.toEntity())
-                    }
-                }
+        // Update tecnicoId if it's 0
+        if (uiState.value.tecnicoId == 0) {
+            uiState.update {
+                it.copy(tecnicoId = null)
             }
         }
 
+
+        var valido = true
+
+        // Validate nombres
+        if (uiState.value.nombres.isEmpty()) {
+            uiState.update {
+                it.copy(nombresError = "El nombre no puede estar vacío")
+            }
+            valido = false
+        }
+
+        // Validate sueldoHora
+        if (uiState.value.sueldoHora == 0.0) {
+            uiState.update {
+                it.copy(sueldoError = "El sueldo no puede ser 0")
+            }
+            valido = false
+        }
+
+        viewModelScope.launch {
+            // Check if nombreTecnicoExiste and update valido accordingly
+            if (!nombreTecnicoExiste()) {
+                uiState.update {
+                    it.copy(nombresError = "El nombre ya existe")
+                }
+                valido = false
+            }
+
+            // Early exit if not valid
+            if (!valido) {
+                return@launch
+            }
+
+            // Update guardo
+            uiState.update {
+                it.copy(guardo = true)
+            }
+
+            // Proceed to save if there are no errors
+            if (uiState.value.sueldoError == null || uiState.value.nombresError == null) {
+
+                repository.saveTecnico(uiState.value.toEntity())
+            }
+        }
     }
 
+
+    suspend fun nombreTecnicoExiste(): Boolean {
+        val tecnico = repository.getTecnico(uiState.value.nombres, uiState.value.tecnicoId ?: 0)
+        return tecnico == null
+    }
+
+
     fun limpiarTecnico() {
-        uiState.update {
-            it.copy(
-                tecnicoId = 0,
-                nombres = "",
-                sueldoHora = 0.0,
-                sueldoError = null,
-                nombresError = null
-            )
+        viewModelScope.launch {
+            uiState.value = TecnicoUIState()
         }
     }
 }
 
 
 data class TecnicoUIState(
-    val tecnicoId: Int = 0,
+    val tecnicoId: Int? = null,
     var nombres: String = "",
     var nombresError: String? = null,
     var sueldoHora: Double? = 0.0,
     var sueldoError: String? = null,
+    var guardo: Boolean = false
 )
 
 fun TecnicoUIState.toEntity(): TecnicoEntity {

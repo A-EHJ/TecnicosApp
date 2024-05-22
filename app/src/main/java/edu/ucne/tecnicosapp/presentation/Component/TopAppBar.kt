@@ -2,8 +2,6 @@ package edu.ucne.tecnicosapp.presentation.Tecnico
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -15,7 +13,7 @@ import androidx.compose.ui.text.style.TextOverflow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
- fun TopAppBar(title: String) {
+fun TopAppBar(title: String) {
     CenterAlignedTopAppBar(
         title = {
             Text(
@@ -25,7 +23,10 @@ import androidx.compose.ui.text.style.TextOverflow
             )
         },
         navigationIcon = {
-            IconButton(onClick = { /* doSomething() */ }) {
+            IconButton(
+                onClick = {
+
+                }) {
                 Icon(
                     imageVector = Icons.Filled.Menu,
                     contentDescription = "Localized description"
@@ -57,3 +58,5 @@ fun TopAppBarVolver(title: String, onVolver: () -> Unit) {
         }
     )
 }
+
+
