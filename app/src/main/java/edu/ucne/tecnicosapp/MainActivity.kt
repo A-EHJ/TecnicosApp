@@ -41,7 +41,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             TecnicosAppTheme {
                 val navController = rememberNavController()
-                NavHost(navController = navController, startDestination = Screen.TecnicoList) {
+                NavHost(navController = navController, startDestination = Screen.TipoTecnicoList) {
 
                     composable<Screen.TecnicoList> {
                         TecnicoListScreen(

@@ -43,12 +43,12 @@ fun NavigationDrawer(
     val scope = rememberCoroutineScope()
     val items = listOf(
         NavigationItem(
-            title = "TécnicoListScreen",
+            title = "Tecnicos",
             selectedIcon = Icons.Filled.AccountCircle,
             unselectedIcon = Icons.Outlined.AccountCircle
         ),
         NavigationItem(
-            title = "TipoTécnicoListScreen",
+            title = "Tipo Técnico",
             selectedIcon = Icons.Filled.Info,
             unselectedIcon = Icons.Outlined.Info
         )
