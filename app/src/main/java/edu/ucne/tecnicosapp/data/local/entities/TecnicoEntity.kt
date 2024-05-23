@@ -1,4 +1,4 @@
-package com.ucne.myapplication.data.local.entities
+package edu.ucne.tecnicosapp.data.local.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
@@ -8,5 +8,7 @@ data class TecnicoEntity(
     @PrimaryKey
     val tecnicoId: Int? = null,
     var nombres: String = "",
-    var sueldoHora: Double = 0.0
+    var sueldoHora: Double = 0.0,
+    val tipoTecnico: String? = null
 )
+

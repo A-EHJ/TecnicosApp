@@ -1,6 +1,5 @@
-package edu.ucne.tecnicosapp.presentation.Tecnico
+package edu.ucne.tecnicosapp.presentation.TipoTecnico
 
-import android.graphics.fonts.FontStyle
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -30,64 +29,49 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import edu.ucne.tecnicosapp.data.local.entities.TipoTecnicoEntity
-import edu.ucne.tecnicosapp.presentation.Component.DropDownInput
-import edu.ucne.tecnicosapp.presentation.TipoTecnico.TipoTecnicoViewModel
+import edu.ucne.tecnicosapp.presentation.Tecnico.TopAppBarVolver
 import edu.ucne.tecnicosapp.ui.theme.TecnicosAppTheme
 
 
 @Composable
-fun TecnicoScreen(
-    tecnicoViewModel: TecnicoViewModel,
-
+fun TipoTecnicoScreen(
+    viewModel: TipoTecnicoViewModel,
     navController: NavController
 ) {
-    val uiState by tecnicoViewModel.uiState.collectAsStateWithLifecycle()
-    val tipos = tecnicoViewModel.tipos.collectAsStateWithLifecycle().value
-    TecnicoBody(
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    TipoTecnicoBody(
         uiState = uiState,
-        onsueldoHoraChanged = tecnicoViewModel::onSueldoHoraChanged,
-        onNombresChanged = tecnicoViewModel::onNombresChanged,
-        limpiarTecnico = tecnicoViewModel::limpiarTecnico,
+        onDescripcionChanged = viewModel::onDescripcionChanged,
+        limpiarTipoTecnico = viewModel::limpiarTipoTecnico,
         onVolver = {
             navController.popBackStack()
         },
-        onSaveTecnico = {
-            tecnicoViewModel.saveTecnico()
+        onSaveTipoTecnico = {
+            viewModel.saveTipoTecnico()
         },
-        onDeleteTecnico = tecnicoViewModel::deleteTecnico,
-        tipoTecnico = tipos,
-           onTipoTecnicoChanged = tecnicoViewModel::onTipoTecnicoChanged
-
-
+        onDeleteTipoTecnico = viewModel::deleteTipoTecnico
     )
 }
 
 @Composable
-fun TecnicoBody(
-    uiState: TecnicoUIState,
-    onsueldoHoraChanged: (String) -> Unit,
-    onNombresChanged: (String) -> Unit,
-    limpiarTecnico: () -> Unit,
+fun TipoTecnicoBody(
+    uiState: TipoTecnicoUIState,
+    onDescripcionChanged: (String) -> Unit,
+    limpiarTipoTecnico: () -> Unit,
     onVolver: () -> Unit,
-    onSaveTecnico: () -> Unit,
-    onDeleteTecnico: () -> Unit,
-    tipoTecnico: List<TipoTecnicoEntity>,
-    onTipoTecnicoChanged: (String)-> Unit
+    onSaveTipoTecnico: () -> Unit,
+    onDeleteTipoTecnico: () -> Unit
 ) {
     val context = LocalContext.current
-    var sinTipo by remember {mutableStateOf(false)}
-
+    var guardarVarios by remember { mutableStateOf(false) }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        topBar = { TopAppBarVolver(title = "Registro de Tecnicos", onVolver) }) { innerPadding ->
+        topBar = { TopAppBarVolver(title = "Registro de Tipo Tecnicos", onVolver) }) { innerPadding ->
 
         ElevatedCard(
             modifier = Modifier
@@ -100,53 +84,16 @@ fun TecnicoBody(
                     .padding(8.dp)
             ) {
                 OutlinedTextField(
-                    label = { Text(text = "Nombres") },
-                    value = uiState.nombres,
-                    onValueChange = onNombresChanged,
-                    isError = !uiState.nombresError.isNullOrEmpty(),
+                    label = { Text(text = "descripcion") },
+                    value = uiState.descripcion,
+                    onValueChange = onDescripcionChanged,
+                    isError = !uiState.descripcionError.isNullOrEmpty(),
                     keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
                     modifier = Modifier.fillMaxWidth()
                 )
 
-
-                if (!uiState.nombresError.isNullOrEmpty()) {
-                    Text(text = uiState.nombresError ?: "", color = Color.Red)
-                }
-
-                OutlinedTextField(
-                    label = { Text(text = "Sueldo por hora") },
-                    value = uiState.sueldoHora.toString(),
-                    onValueChange = { onsueldoHoraChanged(it) },
-                    isError = !uiState.sueldoError.isNullOrEmpty(),
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    keyboardOptions = KeyboardOptions.Default.copy(
-                        keyboardType = KeyboardType.Number,
-                        imeAction = ImeAction.Done
-                    ),
-                )
-
-
-                if (!uiState.sueldoError.isNullOrEmpty()) {
-                    Text(text = uiState.sueldoError ?: "", color = Color.Red)
-                }
-
-                DropDownInput(
-                    items = tipoTecnico,
-                    label = "Tipos Técnico",
-                    itemToString = { it.descripcion},
-                    onItemSelected = {
-                        onTipoTecnicoChanged(it.descripcion)
-                    },
-                    selectedItem = uiState.tipoTecnico ?: "",
-                    isError = sinTipo
-                )
-                if(sinTipo){
-                    Text(
-                        text = "Campo Obligatorio.",
-                        color = Color.Red,
-                        fontSize = 14.sp
-                    )
+                if (!uiState.descripcionError.isNullOrEmpty()) {
+                    Text(text = uiState.descripcionError ?: "", color = Color.Red)
                 }
 
 
@@ -155,10 +102,10 @@ fun TecnicoBody(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    if (uiState.tecnicoId != 0 && uiState.tecnicoId != null) {
+                    if (uiState.tipoTecnicoId != 0 && uiState.tipoTecnicoId != null ) {
                         OutlinedButton(
                             onClick = {
-                                onDeleteTecnico()
+                                onDeleteTipoTecnico()
                                 Toast.makeText(context, "Tecnico eliminado", Toast.LENGTH_SHORT)
                                     .show()
                                 onVolver()
@@ -173,7 +120,7 @@ fun TecnicoBody(
                     }
                     OutlinedButton(
                         onClick = {
-                            limpiarTecnico()
+                            limpiarTipoTecnico()
                         }
                     ) {
                         Icon(
@@ -184,26 +131,20 @@ fun TecnicoBody(
                     }
                     OutlinedButton(
                         onClick = {
-                            onSaveTecnico()
-                            if (uiState.guardo || (!uiState.nombresError.isNullOrEmpty() || !uiState.sueldoError.isNullOrEmpty())) {
-                                if (uiState.tecnicoId != 0) {
-
-                                    Toast.makeText(
-                                        context,
-                                        "Tecnico actualizado",
-                                        Toast.LENGTH_SHORT
-                                    )
+                            onSaveTipoTecnico()
+                            if (uiState.descripcionError.isNullOrEmpty()){
+                                if (uiState.tipoTecnicoId == 0 || uiState.tipoTecnicoId == null) {
+                                    Toast.makeText(context, "Tecnico agregado", Toast.LENGTH_SHORT)
                                         .show()
                                 } else {
-                                    Toast.makeText(context, "Tecnico agregado", Toast.LENGTH_SHORT)
+                                    Toast.makeText(context, "Tecnico actualizado", Toast.LENGTH_SHORT)
                                         .show()
                                 }
                                 onVolver()
-                                limpiarTecnico()
                             }
                         }
                     ) {
-                        if (uiState.tecnicoId == 0 || uiState.tecnicoId == null) {
+                        if (uiState.tipoTecnicoId == 0 || uiState.tipoTecnicoId == null) {
                             Text(text = "Guardar")
                             Icon(
                                 imageVector = Icons.Default.Add,
@@ -227,16 +168,13 @@ fun TecnicoBody(
 @Composable
 private fun PreviewTecnicoBody() {
     TecnicosAppTheme {
-        TecnicoBody(
-            uiState = TecnicoUIState(),
-            onsueldoHoraChanged = {},
-            onNombresChanged = {},
-            limpiarTecnico = {},
+        TipoTecnicoBody(
+            uiState = TipoTecnicoUIState(),
+            onDescripcionChanged = {},
+            limpiarTipoTecnico = {},
             onVolver = {},
-            onSaveTecnico = {},
-            onDeleteTecnico = {},
-            tipoTecnico = listOf(),
-            onTipoTecnicoChanged = {}
+            onSaveTipoTecnico = {},
+            onDeleteTipoTecnico = {}
         )
     }
 }

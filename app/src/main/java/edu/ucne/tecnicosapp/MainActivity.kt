@@ -4,24 +4,23 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import androidx.room.Room
-import com.ucne.myapplication.data.local.database.TecnicoDb
-import com.ucne.myapplication.data.repository.TecnicoRepository
+import edu.ucne.tecnicosapp.data.local.database.TecnicoDb
+import edu.ucne.tecnicosapp.data.repository.TecnicoRepository
+import edu.ucne.tecnicosapp.data.repository.TipoTecnicoRepository
 import edu.ucne.tecnicosapp.presentation.Tecnico.TecnicoListScreen
 import edu.ucne.tecnicosapp.presentation.Tecnico.TecnicoScreen
 import edu.ucne.tecnicosapp.presentation.Tecnico.TecnicoViewModel
+import edu.ucne.tecnicosapp.presentation.TipoTecnico.TipoTecnicoListScreen
+import edu.ucne.tecnicosapp.presentation.TipoTecnico.TipoTecnicoScreen
+import edu.ucne.tecnicosapp.presentation.TipoTecnico.TipoTecnicoViewModel
 import edu.ucne.tecnicosapp.ui.theme.TecnicosAppTheme
+import kotlinx.serialization.Serializable
 
 class MainActivity : ComponentActivity() {
     private lateinit var tecnicoDb: TecnicoDb
@@ -37,10 +36,73 @@ class MainActivity : ComponentActivity() {
             .build()
 
         val repository = TecnicoRepository(tecnicoDb.tecnicoDao())
+        val repository2 = TipoTecnicoRepository(tecnicoDb.tipoTecnicoDao())
         enableEdgeToEdge()
         setContent {
             TecnicosAppTheme {
-                Surface {
+                val navController = rememberNavController()
+                NavHost(navController = navController, startDestination = Screen.TipoTecnicoList) {
+
+                    composable<Screen.TecnicoList> {
+                        TecnicoListScreen(
+                            navController = navController,
+                            viewModel = viewModel { TecnicoViewModel(repository, 0, repository2) },
+                            onVerTecnico = {
+                                navController.navigate(Screen.Tecnico(it.tecnicoId ?: 0))
+                            })
+                    }
+
+                    composable<Screen.Tecnico> {
+                        val args = it.toRoute<Screen.Tecnico>()
+                        TecnicoScreen(
+                            tecnicoViewModel = viewModel {
+                                TecnicoViewModel(
+                                    repository,
+                                    args.tecnicoId,
+                                    repository2
+                                )
+                            },
+                            navController = navController
+                        )
+                    }
+
+                    composable<Screen.TipoTecnicoList> {
+                        TipoTecnicoListScreen(
+                            navController = navController,
+                            viewModel = viewModel { TipoTecnicoViewModel(repository2, 0) },
+                            onVerTipoTecnico = {
+                                navController.navigate(Screen.TipoTecnico(it.tipoTecnicoId ?: 0))
+                            })
+                    }
+
+                    composable<Screen.TipoTecnico> {
+                        val args = it.toRoute<Screen.TipoTecnico>()
+                        TipoTecnicoScreen(
+                            viewModel = viewModel {
+                                TipoTecnicoViewModel(
+                                    repository2,
+                                    args.tipoTecnicoId
+                                )
+                            },
+                            navController = navController
+                        )
+                    }
+
+                }
+            }
+        }
+    }
+}
+
+/*
+               TecnicoScreen(viewModel = viewModel {
+                            TecnicoViewModel.provideFactory(repository)
+
+                        })
+
+
+
+               Surface {
                     val viewModel: TecnicoViewModel = viewModel(
                         factory = TecnicoViewModel.provideFactory(repository)
                     )
@@ -60,9 +122,18 @@ class MainActivity : ComponentActivity() {
                                 })
                         }
                     }
-                }
-            }
-        }
-    }
-}
+                }*/
+sealed class Screen {
+    @Serializable
+    object TecnicoList : Screen()
 
+    @Serializable
+    data class Tecnico(val tecnicoId: Int) : Screen()
+
+    @Serializable
+    object TipoTecnicoList : Screen()
+
+    @Serializable
+    data class TipoTecnico(val tipoTecnicoId: Int) : Screen()
+
+}
