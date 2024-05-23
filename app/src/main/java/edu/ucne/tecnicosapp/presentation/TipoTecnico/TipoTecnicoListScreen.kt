@@ -22,16 +22,19 @@ import androidx.compose.material.icons.twotone.Close
 import androidx.compose.material.icons.twotone.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,25 +43,62 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
 import edu.ucne.tecnicosapp.data.local.entities.TipoTecnicoEntity
 import edu.ucne.tecnicosapp.presentation.Component.FloatingActionButtonSimple
+import edu.ucne.tecnicosapp.presentation.Component.NavigationDrawer
 import edu.ucne.tecnicosapp.presentation.Tecnico.TopAppBar
 import edu.ucne.tecnicosapp.ui.theme.TecnicosAppTheme
+import kotlinx.coroutines.launch
 
 
 @Composable
 fun TipoTecnicoListScreen(
     viewModel: TipoTecnicoViewModel,
-    onVerTipoTecnico: (TipoTecnicoEntity) -> Unit
+    onVerTipoTecnico: (TipoTecnicoEntity) -> Unit,
+    navController: NavHostController
 ) {
     val tipoTecnicos by viewModel.TipoTecnicos.collectAsStateWithLifecycle()
-    TipoTecnicoListBody(
-        tipoTecnicos = tipoTecnicos,
-        onVerTipoTecnico = onVerTipoTecnico,
-        eliminarTipoTecnico = { tipoTecnico ->
-            viewModel.deleteTipoTecnico(tipoTecnico.tipoTecnicoId ?: 0)
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
+    NavigationDrawer(navController = navController, drawerState = drawerState) {
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            topBar = {
+                TopAppBar(
+                    title = "Tipo de Tecnicos",
+                    onMenuClick = { scope.launch { drawerState.open() } }
+                )
+            },
+            floatingActionButton = {
+                FloatingActionButtonSimple(
+                    onClick = {
+                        onVerTipoTecnico(
+                            TipoTecnicoEntity(
+                                tipoTecnicoId = 0,
+                                descripcion = ""
+                            )
+                        )
+                    }
+                )
+            }
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(4.dp)
+                    .padding(it)
+            ) {
+                TipoTecnicoListBody(
+                    tipoTecnicos = tipoTecnicos,
+                    onVerTipoTecnico = onVerTipoTecnico,
+                    eliminarTipoTecnico = {
+                        viewModel.deleteTipoTecnico(it.tipoTecnicoId?:0)
+                    }
+                )
+            }
         }
-    )
+    }
 }
 
 @Composable
@@ -70,143 +110,125 @@ fun TipoTecnicoListBody(
     var showDeleteModeDialog by remember { mutableStateOf(false) }
     var modoEliminarOn by remember { mutableStateOf(false) }
     val context = LocalContext.current
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
 
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        topBar = { TopAppBar(title = "Tipo de Tecnicos") },
-        floatingActionButton = {
-            FloatingActionButtonSimple(
-                onClick = {
-                    onVerTipoTecnico(
-                        TipoTecnicoEntity(
-                            tipoTecnicoId = null,
-                            descripcion = ""
-                        )
-                    )
-                }
-            )
-        }) { innerPadding ->
-        Column(
+    ) {
+        Box(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
+                .fillMaxWidth()
 
         ) {
-            Box(
+            Spacer(
                 modifier = Modifier
                     .fillMaxWidth()
-
-            ) {
-                Spacer(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
-                )
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Absolute.Right
-
-
-                ) {
-                    Text(
-                        text = "ID",
-                        modifier = Modifier
-                            .weight(0.10f),
-                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
-
-                    )
-
-                    Text(
-                        text = "Descripción",
-                        modifier = Modifier
-                            .weight(0.40f)
-                    )
-
-
-                    IconButton(onClick = {
-                        if (!modoEliminarOn) {
-                            showDeleteModeDialog = true
-                        } else {
-                            modoEliminarOn = false
-                            Toast.makeText(context, "Modo eliminar desactivado", Toast.LENGTH_SHORT)
-                                .show()
-                        }
-                    }) {
-                        Icon(
-                            if (modoEliminarOn) Icons.TwoTone.Close else Icons.TwoTone.Delete,
-                            contentDescription = "Eliminar",
-                            tint = Color(0xFFC95050)
-                        )
-                    }
-                }
-            }
-
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-            ) {
-                items(tipoTecnicos) { tecnico ->
-                    TecnicoRow(
-                        onVerTipoTecnico,
-                        tecnico,
-                        modoEliminarOn,
-                        eliminarTipoTecnico,
-                        context
-                    )
-                }
-            }
-        }
-        if (showDeleteModeDialog) {
-            AlertDialog(
-                onDismissRequest = { showDeleteModeDialog = false },
-                title = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.Warning,
-                            contentDescription = "Warning",
-                            tint = Color(0xFFDAA504)
-                        )
-
-                        Spacer(modifier = Modifier.width(8.dp))
-
-                        Text(
-                            "Modo eliminar",
-                            style = typography.titleMedium
-                        )
-                    }
-                },
-                text = {
-                    Text(
-                        "¿Esta seguro de activar el modo eliminar ?",
-                        style = typography.bodyMedium
-                    )
-                },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            modoEliminarOn = true
-                            showDeleteModeDialog = false
-                            Toast.makeText(context, "Modo eliminar activado", Toast.LENGTH_SHORT)
-                                .show()
-                        },
-                        colors = ButtonDefaults.textButtonColors(
-                            contentColor = Color.Red
-                        )
-                    ) {
-                        Text("Confirmar")
-                    }
-                },
-                dismissButton = {
-                    TextButton(
-                        onClick = { showDeleteModeDialog = false }
-                    ) {
-                        Text("Cancelar")
-                    }
-                }
+                    .padding(8.dp)
             )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Absolute.Right
+
+
+            ) {
+                Text(
+                    text = "ID",
+                    modifier = Modifier
+                        .weight(0.10f),
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+
+                )
+
+                Text(
+                    text = "Descripción",
+                    modifier = Modifier
+                        .weight(0.40f)
+                )
+
+
+                IconButton(onClick = {
+                    if (!modoEliminarOn) {
+                        showDeleteModeDialog = true
+                    } else {
+                        modoEliminarOn = false
+                        Toast.makeText(context, "Modo eliminar desactivado", Toast.LENGTH_SHORT)
+                            .show()
+                    }
+                }) {
+                    Icon(
+                        if (modoEliminarOn) Icons.TwoTone.Close else Icons.TwoTone.Delete,
+                        contentDescription = "Eliminar",
+                        tint = Color(0xFFC95050)
+                    )
+                }
+            }
         }
+
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
+            items(tipoTecnicos) { tecnico ->
+                TecnicoRow(
+                    onVerTipoTecnico,
+                    tecnico,
+                    modoEliminarOn,
+                    eliminarTipoTecnico,
+                    context
+                )
+            }
+        }
+    }
+    if (showDeleteModeDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteModeDialog = false },
+            title = {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.Warning,
+                        contentDescription = "Warning",
+                        tint = Color(0xFFDAA504)
+                    )
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    Text(
+                        "Modo eliminar",
+                        style = typography.titleMedium
+                    )
+                }
+            },
+            text = {
+                Text(
+                    "¿Esta seguro de activar el modo eliminar ?",
+                    style = typography.bodyMedium
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        modoEliminarOn = true
+                        showDeleteModeDialog = false
+                        Toast.makeText(context, "Modo eliminar activado", Toast.LENGTH_SHORT)
+                            .show()
+                    },
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = Color.Red
+                    )
+                ) {
+                    Text("Confirmar")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showDeleteModeDialog = false }
+                ) {
+                    Text("Cancelar")
+                }
+            }
+        )
     }
 }
 

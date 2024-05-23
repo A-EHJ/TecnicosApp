@@ -1,5 +1,6 @@
 package edu.ucne.tecnicosapp.presentation.Tecnico
 
+import android.graphics.fonts.FontStyle
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -32,29 +33,39 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import edu.ucne.tecnicosapp.data.local.entities.TipoTecnicoEntity
+import edu.ucne.tecnicosapp.presentation.Component.DropDownInput
+import edu.ucne.tecnicosapp.presentation.TipoTecnico.TipoTecnicoViewModel
 import edu.ucne.tecnicosapp.ui.theme.TecnicosAppTheme
 
 
 @Composable
 fun TecnicoScreen(
-    viewModel: TecnicoViewModel,
+    tecnicoViewModel: TecnicoViewModel,
+
     navController: NavController
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val uiState by tecnicoViewModel.uiState.collectAsStateWithLifecycle()
+    val tipos = tecnicoViewModel.tipos.collectAsStateWithLifecycle().value
     TecnicoBody(
         uiState = uiState,
-        onsueldoHoraChanged = viewModel::onSueldoHoraChanged,
-        onNombresChanged = viewModel::onNombresChanged,
-        limpiarTecnico = viewModel::limpiarTecnico,
+        onsueldoHoraChanged = tecnicoViewModel::onSueldoHoraChanged,
+        onNombresChanged = tecnicoViewModel::onNombresChanged,
+        limpiarTecnico = tecnicoViewModel::limpiarTecnico,
         onVolver = {
             navController.popBackStack()
         },
         onSaveTecnico = {
-            viewModel.saveTecnico()
+            tecnicoViewModel.saveTecnico()
         },
-        onDeleteTecnico = viewModel::deleteTecnico
+        onDeleteTecnico = tecnicoViewModel::deleteTecnico,
+        tipoTecnico = tipos,
+           onTipoTecnicoChanged = tecnicoViewModel::onTipoTecnicoChanged
+
+
     )
 }
 
@@ -66,10 +77,13 @@ fun TecnicoBody(
     limpiarTecnico: () -> Unit,
     onVolver: () -> Unit,
     onSaveTecnico: () -> Unit,
-    onDeleteTecnico: () -> Unit
+    onDeleteTecnico: () -> Unit,
+    tipoTecnico: List<TipoTecnicoEntity>,
+    onTipoTecnicoChanged: (String)-> Unit
 ) {
     val context = LocalContext.current
-    var guardarVarios by remember { mutableStateOf(false) }
+    var sinTipo by remember {mutableStateOf(false)}
+
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -112,9 +126,29 @@ fun TecnicoBody(
                     ),
                 )
 
+
                 if (!uiState.sueldoError.isNullOrEmpty()) {
                     Text(text = uiState.sueldoError ?: "", color = Color.Red)
                 }
+
+                DropDownInput(
+                    items = tipoTecnico,
+                    label = "Tipos Técnico",
+                    itemToString = { it.descripcion},
+                    onItemSelected = {
+                        onTipoTecnicoChanged(it.descripcion)
+                    },
+                    selectedItem = uiState.tipoTecnico ?: "",
+                    isError = sinTipo
+                )
+                if(sinTipo){
+                    Text(
+                        text = "Campo Obligatorio.",
+                        color = Color.Red,
+                        fontSize = 14.sp
+                    )
+                }
+
 
                 Spacer(modifier = Modifier.padding(2.dp))
                 Row(
@@ -200,7 +234,9 @@ private fun PreviewTecnicoBody() {
             limpiarTecnico = {},
             onVolver = {},
             onSaveTecnico = {},
-            onDeleteTecnico = {}
+            onDeleteTecnico = {},
+            tipoTecnico = listOf(),
+            onTipoTecnicoChanged = {}
         )
     }
 }

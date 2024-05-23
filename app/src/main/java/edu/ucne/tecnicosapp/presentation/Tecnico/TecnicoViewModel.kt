@@ -4,17 +4,26 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import edu.ucne.tecnicosapp.data.local.entities.TecnicoEntity
 import edu.ucne.tecnicosapp.data.repository.TecnicoRepository
+import edu.ucne.tecnicosapp.data.repository.TipoTecnicoRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class TecnicoViewModel(private val repository: TecnicoRepository, private val TecnicoId: Int) :
+class TecnicoViewModel(private val repository: TecnicoRepository, private val TecnicoId: Int, private val tipoRepository: TipoTecnicoRepository) :
     ViewModel() {
 
     val regexSueldoHora = Regex("^[0-9]{0,7}(\\.[0-9]{0,2})?$")
     val regexNombre: Regex = Regex("^[a-zA-Z]+(?: [a-zA-Z]+)*$")
+
+
+    val tipos = tipoRepository.getTipoTecnicos()
+        .stateIn(
+            viewModelScope,
+            SharingStarted.Lazily,
+            emptyList()
+        )
 
     var uiState = MutableStateFlow(TecnicoUIState())
         private set
@@ -25,6 +34,12 @@ class TecnicoViewModel(private val repository: TecnicoRepository, private val Te
             started = SharingStarted.WhileSubscribed(5_000),
             initialValue = emptyList()
         )
+
+    fun onTipoTecnicoChanged(tipoTecnico: String) {
+        uiState.update {
+            it.copy(tipoTecnico = tipoTecnico)
+        }
+    }
 
 
     fun deleteTecnico() {
@@ -102,6 +117,8 @@ class TecnicoViewModel(private val repository: TecnicoRepository, private val Te
             valido = false
         }
 
+
+
         // Validate sueldoHora
         if (uiState.value.sueldoHora == 0.0) {
             uiState.update {
@@ -110,7 +127,18 @@ class TecnicoViewModel(private val repository: TecnicoRepository, private val Te
             valido = false
         }
 
+        // Validate tipoTecnico
+        if (uiState.value.tipoTecnico.isNullOrEmpty()) {
+            uiState.update {
+                it.copy(tipoTecnicoError = "El tipo no puede estar vacío")
+            }
+        }
+
+
+
+
         viewModelScope.launch {
+
             // Check if nombreTecnicoExiste and update valido accordingly
             if (!nombreTecnicoExiste()) {
                 uiState.update {
@@ -131,7 +159,6 @@ class TecnicoViewModel(private val repository: TecnicoRepository, private val Te
 
             // Proceed to save if there are no errors
             if (uiState.value.sueldoError == null || uiState.value.nombresError == null) {
-
                 repository.saveTecnico(uiState.value.toEntity())
             }
         }
@@ -158,6 +185,8 @@ data class TecnicoUIState(
     var nombresError: String? = null,
     var sueldoHora: Double? = 0.0,
     var sueldoError: String? = null,
+    var tipoTecnico: String? = "",
+    var tipoTecnicoError: String? = "",
     var guardo: Boolean = false
 )
 

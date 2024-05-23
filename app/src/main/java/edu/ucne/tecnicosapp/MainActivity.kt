@@ -41,11 +41,12 @@ class MainActivity : ComponentActivity() {
         setContent {
             TecnicosAppTheme {
                 val navController = rememberNavController()
-                NavHost(navController = navController, startDestination = Screen.TipoTecnicoList) {
+                NavHost(navController = navController, startDestination = Screen.TecnicoList) {
 
                     composable<Screen.TecnicoList> {
                         TecnicoListScreen(
-                            viewModel = viewModel { TecnicoViewModel(repository, 0) },
+                            navController = navController,
+                            viewModel = viewModel { TecnicoViewModel(repository, 0, repository2) },
                             onVerTecnico = {
                                 navController.navigate(Screen.Tecnico(it.tecnicoId ?: 0))
                             })
@@ -54,13 +55,20 @@ class MainActivity : ComponentActivity() {
                     composable<Screen.Tecnico> {
                         val args = it.toRoute<Screen.Tecnico>()
                         TecnicoScreen(
-                            viewModel = viewModel { TecnicoViewModel(repository, args.tecnicoId) },
+                            tecnicoViewModel = viewModel {
+                                TecnicoViewModel(
+                                    repository,
+                                    args.tecnicoId,
+                                    repository2
+                                )
+                            },
                             navController = navController
                         )
                     }
 
                     composable<Screen.TipoTecnicoList> {
                         TipoTecnicoListScreen(
+                            navController = navController,
                             viewModel = viewModel { TipoTecnicoViewModel(repository2, 0) },
                             onVerTipoTecnico = {
                                 navController.navigate(Screen.TipoTecnico(it.tipoTecnicoId ?: 0))

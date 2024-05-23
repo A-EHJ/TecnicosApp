@@ -9,6 +9,6 @@ data class TecnicoEntity(
     val tecnicoId: Int? = null,
     var nombres: String = "",
     var sueldoHora: Double = 0.0,
-    val tipoTecnicoId: Int? = null
+    val tipoTecnico: String? = null
 )
 

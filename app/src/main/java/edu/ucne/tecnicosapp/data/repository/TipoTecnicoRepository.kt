@@ -28,4 +28,6 @@ class TipoTecnicoRepository(private val tipoTecnicodao: TipoTecnicoDao) {
 
     suspend fun getTipoTecnico(descripcion: String, tipoTecnicoId: Int) = tipoTecnicodao.find(descripcion.toLowerCase().replace(" ", ""), tipoTecnicoId)
 
+    suspend fun getTipoTecnicoId(descripcion: String) = tipoTecnicodao.find(descripcion)
+
 }
