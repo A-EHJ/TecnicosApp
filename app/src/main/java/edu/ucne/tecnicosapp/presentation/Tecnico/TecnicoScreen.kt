@@ -43,7 +43,7 @@ fun TecnicoScreen(
     navController: NavController
 ) {
     val uiState by tecnicoViewModel.uiState.collectAsStateWithLifecycle()
-    val tipos = tecnicoViewModel.tipos.collectAsStateWithLifecycle().value
+    val tipos = tecnicoViewModel.tiposTecnicos.collectAsStateWithLifecycle().value
     TecnicoBody(
         uiState = uiState,
         onsueldoHoraChanged = tecnicoViewModel::onSueldoHoraChanged,

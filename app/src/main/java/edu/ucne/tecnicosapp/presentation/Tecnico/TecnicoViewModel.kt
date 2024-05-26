@@ -18,7 +18,7 @@ class TecnicoViewModel(private val repository: TecnicoRepository, private val Te
     val regexNombre: Regex = Regex("^[a-zA-Z]+(?: [a-zA-Z]+)*$")
 
 
-    val tipos = tipoRepository.getTipoTecnicos()
+    val tiposTecnicos = tipoRepository.getTipoTecnicos()
         .stateIn(
             viewModelScope,
             SharingStarted.Lazily,
@@ -156,10 +156,12 @@ class TecnicoViewModel(private val repository: TecnicoRepository, private val Te
             uiState.update {
                 it.copy(guardo = true)
             }
+            val tipoId = tipoRepository.getTipoTecnicoId(uiState.value.tipoTecnico ?: "")
+
 
             // Proceed to save if there are no errors
             if (uiState.value.sueldoError == null || uiState.value.nombresError == null) {
-                repository.saveTecnico(uiState.value.toEntity())
+                repository.saveTecnico(uiState.value.toEntity(tipoId))
             }
         }
     }
@@ -190,11 +192,11 @@ data class TecnicoUIState(
     var guardo: Boolean = false
 )
 
-fun TecnicoUIState.toEntity(): TecnicoEntity {
+fun TecnicoUIState.toEntity(tipoId: Int? = null): TecnicoEntity {
     return TecnicoEntity(
         tecnicoId = tecnicoId,
         nombres = nombres,
         sueldoHora = sueldoHora ?: 0.0,
-        tipoTecnico = tipoTecnico ?: ""
+        tipoTecnicoId = tipoId
     )
 }

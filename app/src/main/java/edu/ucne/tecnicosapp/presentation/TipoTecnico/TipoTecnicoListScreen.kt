@@ -22,14 +22,13 @@ import androidx.compose.material.icons.twotone.Close
 import androidx.compose.material.icons.twotone.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.DrawerState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -43,10 +42,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavHostController
 import edu.ucne.tecnicosapp.data.local.entities.TipoTecnicoEntity
 import edu.ucne.tecnicosapp.presentation.Component.FloatingActionButtonSimple
-import edu.ucne.tecnicosapp.presentation.Component.NavigationDrawer
 import edu.ucne.tecnicosapp.presentation.Tecnico.TopAppBar
 import edu.ucne.tecnicosapp.ui.theme.TecnicosAppTheme
 import kotlinx.coroutines.launch
@@ -56,47 +53,44 @@ import kotlinx.coroutines.launch
 fun TipoTecnicoListScreen(
     viewModel: TipoTecnicoViewModel,
     onVerTipoTecnico: (TipoTecnicoEntity) -> Unit,
-    navController: NavHostController
+    drawerState: DrawerState
 ) {
     val tipoTecnicos by viewModel.TipoTecnicos.collectAsStateWithLifecycle()
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-    NavigationDrawer(navController = navController, drawerState = drawerState) {
-        Scaffold(
-            modifier = Modifier.fillMaxSize(),
-            topBar = {
-                TopAppBar(
-                    title = "Tipo de Tecnicos",
-                    onMenuClick = { scope.launch { drawerState.open() } }
-                )
-            },
-            floatingActionButton = {
-                FloatingActionButtonSimple(
-                    onClick = {
-                        onVerTipoTecnico(
-                            TipoTecnicoEntity(
-                                tipoTecnicoId = 0,
-                                descripcion = ""
-                            )
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        topBar = {
+            TopAppBar(
+                title = "Tipo de Tecnicos",
+                onMenuClick = { scope.launch { drawerState.open() } }
+            )
+        },
+        floatingActionButton = {
+            FloatingActionButtonSimple(
+                onClick = {
+                    onVerTipoTecnico(
+                        TipoTecnicoEntity(
+                            tipoTecnicoId = 0,
+                            descripcion = ""
                         )
-                    }
-                )
-            }
+                    )
+                }
+            )
+        }
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(4.dp)
+                .padding(it)
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(4.dp)
-                    .padding(it)
-            ) {
-                TipoTecnicoListBody(
-                    tipoTecnicos = tipoTecnicos,
-                    onVerTipoTecnico = onVerTipoTecnico,
-                    eliminarTipoTecnico = {
-                        viewModel.deleteTipoTecnico(it.tipoTecnicoId?:0)
-                    }
-                )
-            }
+            TipoTecnicoListBody(
+                tipoTecnicos = tipoTecnicos,
+                onVerTipoTecnico = onVerTipoTecnico,
+                eliminarTipoTecnico = {
+                    viewModel.deleteTipoTecnico(it.tipoTecnicoId ?: 0)
+                }
+            )
         }
     }
 }

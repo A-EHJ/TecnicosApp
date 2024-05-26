@@ -45,58 +45,80 @@ class MainActivity : ComponentActivity() {
             TecnicosAppTheme {
                 val navController = rememberNavController()
                 val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-                NavHost(navController = navController, startDestination = Screen.TecnicoList) {
 
-                    composable<Screen.TecnicoList> {
-                        TecnicoListScreen(
-                            navController = navController,
-                            viewModel = viewModel { TecnicoViewModel(repository, 0, repository2) },
-                            onVerTecnico = {
-                                navController.navigate(Screen.Tecnico(it.tecnicoId ?: 0))
-                            })
+                NavigationDrawer(
+                    navController = navController,
+                    drawerState = drawerState,
+                ) {
+
+
+                    NavHost(
+                        navController = navController,
+                        startDestination = Screen.TecnicoList
+                    ) {
+
+                        composable<Screen.TecnicoList> {
+                            TecnicoListScreen(
+                                drawerState = drawerState,
+                                viewModel = viewModel {
+                                    TecnicoViewModel(
+                                        repository,
+                                        0,
+                                        repository2
+                                    )
+                                },
+                                onVerTecnico = {
+                                    navController.navigate(Screen.Tecnico(it.tecnicoId ?: 0))
+                                })
+                        }
+
+                        composable<Screen.Tecnico> {
+                            val args = it.toRoute<Screen.Tecnico>()
+                            TecnicoScreen(
+                                tecnicoViewModel = viewModel {
+                                    TecnicoViewModel(
+                                        repository,
+                                        args.tecnicoId,
+                                        repository2
+                                    )
+                                },
+                                navController = navController
+                            )
+                        }
+
+                        composable<Screen.TipoTecnicoList> {
+                            TipoTecnicoListScreen(
+                                drawerState = drawerState,
+                                viewModel = viewModel { TipoTecnicoViewModel(repository2, 0) },
+                                onVerTipoTecnico = {
+                                    navController.navigate(
+                                        Screen.TipoTecnico(
+                                            it.tipoTecnicoId ?: 0
+                                        )
+                                    )
+                                })
+                        }
+
+                        composable<Screen.TipoTecnico> {
+                            val args = it.toRoute<Screen.TipoTecnico>()
+                            TipoTecnicoScreen(
+                                viewModel = viewModel {
+                                    TipoTecnicoViewModel(
+                                        repository2,
+                                        args.tipoTecnicoId
+                                    )
+                                },
+                                navController = navController
+                            )
+                        }
+
                     }
-
-                    composable<Screen.Tecnico> {
-                        val args = it.toRoute<Screen.Tecnico>()
-                        TecnicoScreen(
-                            tecnicoViewModel = viewModel {
-                                TecnicoViewModel(
-                                    repository,
-                                    args.tecnicoId,
-                                    repository2
-                                )
-                            },
-                            navController = navController
-                        )
-                    }
-
-                    composable<Screen.TipoTecnicoList> {
-                        TipoTecnicoListScreen(
-                            navController = navController,
-                            viewModel = viewModel { TipoTecnicoViewModel(repository2, 0) },
-                            onVerTipoTecnico = {
-                                navController.navigate(Screen.TipoTecnico(it.tipoTecnicoId ?: 0))
-                            })
-                    }
-
-                    composable<Screen.TipoTecnico> {
-                        val args = it.toRoute<Screen.TipoTecnico>()
-                        TipoTecnicoScreen(
-                            viewModel = viewModel {
-                                TipoTecnicoViewModel(
-                                    repository2,
-                                    args.tipoTecnicoId
-                                )
-                            },
-                            navController = navController
-                        )
-                    }
-
                 }
             }
         }
     }
 }
+
 
 /*
                TecnicoScreen(viewModel = viewModel {

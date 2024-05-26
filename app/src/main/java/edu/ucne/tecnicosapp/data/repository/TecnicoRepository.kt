@@ -13,7 +13,6 @@ class TecnicoRepository(private val tecnicoDao: TecnicoDao) {
         tecnico?.let { tecnicoDao.delete(it) }
     }
 
-
     suspend fun deleteTecnico(ids: List<Int>) {
         ids.forEach { id ->
             tecnicoDao.find(id).let { tecnico ->
