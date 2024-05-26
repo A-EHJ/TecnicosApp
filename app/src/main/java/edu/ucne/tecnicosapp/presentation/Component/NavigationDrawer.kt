@@ -76,8 +76,8 @@ fun NavigationDrawer(
                             selectedItem.value = item
                             scope.launch { drawerState.close() }
                             when (item.title) {
-                                "TécnicoListScreen" -> navController.navigate(Screen.TecnicoList)
-                                "TipoTécnicoListScreen" -> navController.navigate(Screen.TipoTecnicoList)
+                                "Tecnicos" -> navController.navigate(Screen.TecnicoList)
+                                "Tipo Técnico" -> navController.navigate(Screen.TipoTecnicoList)
                             }
                         },
                         modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)

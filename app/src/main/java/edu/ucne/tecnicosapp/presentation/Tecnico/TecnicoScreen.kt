@@ -1,6 +1,5 @@
 package edu.ucne.tecnicosapp.presentation.Tecnico
 
-import android.graphics.fonts.FontStyle
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -23,9 +22,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -33,12 +29,10 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import edu.ucne.tecnicosapp.data.local.entities.TipoTecnicoEntity
 import edu.ucne.tecnicosapp.presentation.Component.DropDownInput
-import edu.ucne.tecnicosapp.presentation.TipoTecnico.TipoTecnicoViewModel
 import edu.ucne.tecnicosapp.ui.theme.TecnicosAppTheme
 
 
@@ -82,8 +76,6 @@ fun TecnicoBody(
     onTipoTecnicoChanged: (String)-> Unit
 ) {
     val context = LocalContext.current
-    var sinTipo by remember {mutableStateOf(false)}
-
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -139,14 +131,10 @@ fun TecnicoBody(
                         onTipoTecnicoChanged(it.descripcion)
                     },
                     selectedItem = uiState.tipoTecnico ?: "",
-                    isError = sinTipo
+                    isError = !uiState.tipoTecnicoError.isNullOrEmpty()
                 )
-                if(sinTipo){
-                    Text(
-                        text = "Campo Obligatorio.",
-                        color = Color.Red,
-                        fontSize = 14.sp
-                    )
+                if (!uiState.tipoTecnicoError.isNullOrEmpty()) {
+                    Text(text = uiState.tipoTecnicoError ?: "", color = Color.Red)
                 }
 
 

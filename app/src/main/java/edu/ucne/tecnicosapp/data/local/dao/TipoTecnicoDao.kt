@@ -49,6 +49,4 @@ interface TipoTecnicoDao {
 
     @Query("SELECT * FROM TipoTecnico")
     fun getAll(): Flow<List<TipoTecnicoEntity>>
-
-
 }

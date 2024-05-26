@@ -195,5 +195,6 @@ fun TecnicoUIState.toEntity(): TecnicoEntity {
         tecnicoId = tecnicoId,
         nombres = nombres,
         sueldoHora = sueldoHora ?: 0.0,
+        tipoTecnico = tipoTecnico ?: ""
     )
 }

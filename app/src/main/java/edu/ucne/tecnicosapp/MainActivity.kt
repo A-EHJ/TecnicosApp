@@ -4,6 +4,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.rememberDrawerState
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -13,6 +15,7 @@ import androidx.room.Room
 import edu.ucne.tecnicosapp.data.local.database.TecnicoDb
 import edu.ucne.tecnicosapp.data.repository.TecnicoRepository
 import edu.ucne.tecnicosapp.data.repository.TipoTecnicoRepository
+import edu.ucne.tecnicosapp.presentation.Component.NavigationDrawer
 import edu.ucne.tecnicosapp.presentation.Tecnico.TecnicoListScreen
 import edu.ucne.tecnicosapp.presentation.Tecnico.TecnicoScreen
 import edu.ucne.tecnicosapp.presentation.Tecnico.TecnicoViewModel
@@ -41,7 +44,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             TecnicosAppTheme {
                 val navController = rememberNavController()
-                NavHost(navController = navController, startDestination = Screen.TipoTecnicoList) {
+                val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+                NavHost(navController = navController, startDestination = Screen.TecnicoList) {
 
                     composable<Screen.TecnicoList> {
                         TecnicoListScreen(

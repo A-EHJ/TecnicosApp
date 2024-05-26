@@ -13,7 +13,7 @@ import edu.ucne.tecnicosapp.data.local.entities.TipoTecnicoEntity
         TecnicoEntity::class,
         TipoTecnicoEntity::class
     ],
-    version = 5,
+    version = 7,
     exportSchema = false
 )
 abstract class TecnicoDb : RoomDatabase() {
