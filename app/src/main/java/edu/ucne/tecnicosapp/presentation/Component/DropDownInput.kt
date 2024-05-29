@@ -28,8 +28,9 @@ fun <T> DropDownInput(
     itemToString: (T) -> String,
     onItemSelected: (T) -> Unit,
     selectedItem: String,
-    isError: Boolean
-) {
+    isError: Boolean,
+
+    ) {
     var expanded by remember { mutableStateOf(false) }
     var selectedText by remember { mutableStateOf(selectedItem) }
 
@@ -77,6 +78,67 @@ fun <T> DropDownInput(
     }
 
 }
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun <T> DropDownInput2(
+    items: List<T>,
+    label: String,
+    itemToString: (T) -> String,
+    onItemSelected: (T) -> Unit,
+    itemToId: (T) -> Int?,
+    selectedItemId: Int?,
+    isError: Boolean
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val selectedItem = items.find { itemToId(it) == selectedItemId }
+    val selectedText = selectedItem?.let { itemToString(it) } ?: ""
+
+    val icon = if (expanded)
+        Icons.Filled.KeyboardArrowUp
+    else
+        Icons.Filled.KeyboardArrowDown
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded }
+    ) {
+        Column {
+            OutlinedTextField(
+                value = selectedText,
+                readOnly = true,
+                onValueChange = {},
+                modifier = Modifier
+                    .clickable { expanded = !expanded }
+                    .menuAnchor()
+                    .fillMaxWidth(),
+                label = { Text(label) },
+                trailingIcon = {
+                    Icon(icon, contentDescription = "inputSelect",
+                        Modifier.clickable { expanded = !expanded })
+                },
+                isError = isError
+            )
+            ExposedDropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                items.forEach { item ->
+                    DropdownMenuItem(
+                        onClick = {
+                            onItemSelected(item)
+                            expanded = false
+                        },
+                        text = { Text(itemToString(item)) }
+                    )
+                }
+            }
+        }
+    }
+
+}
+
 
 
 

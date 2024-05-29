@@ -38,8 +38,8 @@ class MainActivity : ComponentActivity() {
             .fallbackToDestructiveMigration()
             .build()
 
-        val repository = TecnicoRepository(tecnicoDb.tecnicoDao())
-        val repository2 = TipoTecnicoRepository(tecnicoDb.tipoTecnicoDao())
+        val tecnicoRepository = TecnicoRepository(tecnicoDb.tecnicoDao())
+        val tipoTecnicoTepository = TipoTecnicoRepository(tecnicoDb.tipoTecnicoDao())
         enableEdgeToEdge()
         setContent {
             TecnicosAppTheme {
@@ -62,9 +62,9 @@ class MainActivity : ComponentActivity() {
                                 drawerState = drawerState,
                                 viewModel = viewModel {
                                     TecnicoViewModel(
-                                        repository,
+                                        tecnicoRepository,
                                         0,
-                                        repository2
+                                        tipoTecnicoTepository
                                     )
                                 },
                                 onVerTecnico = {
@@ -77,9 +77,9 @@ class MainActivity : ComponentActivity() {
                             TecnicoScreen(
                                 tecnicoViewModel = viewModel {
                                     TecnicoViewModel(
-                                        repository,
+                                        tecnicoRepository,
                                         args.tecnicoId,
-                                        repository2
+                                        tipoTecnicoTepository
                                     )
                                 },
                                 navController = navController
@@ -89,7 +89,7 @@ class MainActivity : ComponentActivity() {
                         composable<Screen.TipoTecnicoList> {
                             TipoTecnicoListScreen(
                                 drawerState = drawerState,
-                                viewModel = viewModel { TipoTecnicoViewModel(repository2, 0) },
+                                viewModel = viewModel { TipoTecnicoViewModel(tipoTecnicoTepository, 0) },
                                 onVerTipoTecnico = {
                                     navController.navigate(
                                         Screen.TipoTecnico(
@@ -104,7 +104,7 @@ class MainActivity : ComponentActivity() {
                             TipoTecnicoScreen(
                                 viewModel = viewModel {
                                     TipoTecnicoViewModel(
-                                        repository2,
+                                        tipoTecnicoTepository,
                                         args.tipoTecnicoId
                                     )
                                 },
@@ -163,3 +163,9 @@ sealed class Screen {
     data class TipoTecnico(val tipoTecnicoId: Int) : Screen()
 
 }
+
+
+
+
+
+
