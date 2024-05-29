@@ -7,5 +7,5 @@ import androidx.room.PrimaryKey
 data class TipoTecnicoEntity(
     @PrimaryKey
     val tipoTecnicoId: Int? = null,
-    var descripcion: String = "",
+    val descripcion: String = "",
 )

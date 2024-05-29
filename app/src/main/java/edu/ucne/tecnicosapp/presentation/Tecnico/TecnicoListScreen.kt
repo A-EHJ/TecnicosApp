@@ -74,7 +74,8 @@ fun TecnicoListScreen(
                         TecnicoEntity(
                             tecnicoId = null,
                             nombres = "",
-                            sueldoHora = 0.0
+                            sueldoHora = 0.0,
+                            tipoTecnicoId = 0
                         )
                     )
                 }

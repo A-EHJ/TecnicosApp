@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 import java.util.Locale
 
 class TipoTecnicoViewModel(
-    private val repository: TipoTecnicoRepository,
+    private val tipoTecnicorepository: TipoTecnicoRepository,
     private val TipoTecnicoId: Int
 ) :
     ViewModel() {
@@ -21,7 +21,7 @@ class TipoTecnicoViewModel(
     var uiState = MutableStateFlow(TipoTecnicoUIState())
         private set
 
-    val TipoTecnicos = repository.getTipoTecnicos()
+    val TipoTecnicos = tipoTecnicorepository.getTipoTecnicos()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
@@ -31,13 +31,13 @@ class TipoTecnicoViewModel(
 
     fun deleteTipoTecnico() {
         viewModelScope.launch {
-            repository.deleteTipoTecnico(uiState.value.toEntity())
+            tipoTecnicorepository.deleteTipoTecnico(uiState.value.toEntity())
         }
     }
 
     fun deleteTipoTecnico(id: Int) {
         viewModelScope.launch {
-            repository.deleteTipoTecnico(id)
+            tipoTecnicorepository.deleteTipoTecnico(id)
         }
     }
 
@@ -55,7 +55,7 @@ class TipoTecnicoViewModel(
 
     init {
         viewModelScope.launch {
-            val TipoTecnico = repository.getTipoTecnico(TipoTecnicoId)
+            val TipoTecnico = tipoTecnicorepository.getTipoTecnico(TipoTecnicoId)
 
             TipoTecnico?.let {
                 uiState.update {
@@ -67,6 +67,9 @@ class TipoTecnicoViewModel(
             }
         }
     }
+
+
+
 
     fun saveTipoTecnico() {
         // Reset errors
@@ -115,14 +118,14 @@ class TipoTecnicoViewModel(
             // Proceed to save if there are no errors
             if (uiState.value.descripcionError == null) {
 
-                repository.saveTipoTecnico(uiState.value.toEntity())
+                tipoTecnicorepository.saveTipoTecnico(uiState.value.toEntity())
             }
         }
     }
 
 
     suspend fun descripcionTipoTecnicoExiste(): Boolean {
-        val tecnico = repository.getTipoTecnico(uiState.value.descripcion, uiState.value.tipoTecnicoId ?: 0)
+        val tecnico = tipoTecnicorepository.getTipoTecnico(uiState.value.descripcion, uiState.value.tipoTecnicoId ?: 0)
         return tecnico == null
     }
 

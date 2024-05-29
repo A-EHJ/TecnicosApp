@@ -11,14 +11,14 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class TecnicoViewModel(private val repository: TecnicoRepository, private val TecnicoId: Int, private val tipoRepository: TipoTecnicoRepository) :
+class TecnicoViewModel(private val tecnicorepository: TecnicoRepository, private val TecnicoId: Int, private val tipoTecnicoRepository: TipoTecnicoRepository) :
     ViewModel() {
 
     val regexSueldoHora = Regex("^[0-9]{0,7}(\\.[0-9]{0,2})?$")
     val regexNombre: Regex = Regex("^[a-zA-Z]+(?: [a-zA-Z]+)*$")
 
 
-    val tiposTecnicos = tipoRepository.getTipoTecnicos()
+    val tiposTecnicos = tipoTecnicoRepository.getTipoTecnicos()
         .stateIn(
             viewModelScope,
             SharingStarted.Lazily,
@@ -28,7 +28,7 @@ class TecnicoViewModel(private val repository: TecnicoRepository, private val Te
     var uiState = MutableStateFlow(TecnicoUIState())
         private set
 
-    val tecnicos = repository.getTecnicos()
+    val tecnicos = tecnicorepository.getTecnicos()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
@@ -44,13 +44,13 @@ class TecnicoViewModel(private val repository: TecnicoRepository, private val Te
 
     fun deleteTecnico() {
         viewModelScope.launch {
-            repository.deleteTecnico(uiState.value.toEntity())
+            tecnicorepository.deleteTecnico(uiState.value.toEntity())
         }
     }
 
     fun deleteTecnico(id: Int) {
         viewModelScope.launch {
-            repository.deleteTecnico(id)
+            tecnicorepository.deleteTecnico(id)
         }
     }
 
@@ -79,14 +79,15 @@ class TecnicoViewModel(private val repository: TecnicoRepository, private val Te
 
     init {
         viewModelScope.launch {
-            val Tecnico = repository.getTecnico(TecnicoId)
+            val Tecnico = tecnicorepository.getTecnico(TecnicoId)
 
             Tecnico?.let {
                 uiState.update {
                     it.copy(
                         tecnicoId = Tecnico.tecnicoId ?: 0,
                         nombres = Tecnico.nombres,
-                        sueldoHora = Tecnico.sueldoHora
+                        sueldoHora = Tecnico.sueldoHora,
+                        tipoTecnicoId = Tecnico.tipoTecnicoId
                     )
                 }
             }
@@ -156,19 +157,21 @@ class TecnicoViewModel(private val repository: TecnicoRepository, private val Te
             uiState.update {
                 it.copy(guardo = true)
             }
-            val tipoId = tipoRepository.getTipoTecnicoId(uiState.value.tipoTecnico ?: "")
 
+            uiState.update {
+                it.copy(tipoTecnicoId = tipoTecnicoRepository.getTipoTecnicoId(uiState.value.tipoTecnico ?: ""))
+            }
 
             // Proceed to save if there are no errors
             if (uiState.value.sueldoError == null || uiState.value.nombresError == null) {
-                repository.saveTecnico(uiState.value.toEntity(tipoId))
+                tecnicorepository.saveTecnico(uiState.value.toEntity())
             }
         }
     }
 
 
     suspend fun nombreTecnicoExiste(): Boolean {
-        val tecnico = repository.getTecnico(uiState.value.nombres, uiState.value.tecnicoId ?: 0)
+        val tecnico = tecnicorepository.getTecnico(uiState.value.nombres, uiState.value.tecnicoId ?: 0)
         return tecnico == null
     }
 
@@ -188,15 +191,16 @@ data class TecnicoUIState(
     var sueldoHora: Double? = 0.0,
     var sueldoError: String? = null,
     var tipoTecnico: String? = "",
+    var tipoTecnicoId: Int? = null,
     var tipoTecnicoError: String? = "",
     var guardo: Boolean = false
 )
 
-fun TecnicoUIState.toEntity(tipoId: Int? = null): TecnicoEntity {
+fun TecnicoUIState.toEntity(): TecnicoEntity {
     return TecnicoEntity(
         tecnicoId = tecnicoId,
         nombres = nombres,
         sueldoHora = sueldoHora ?: 0.0,
-        tipoTecnicoId = tipoId
+        tipoTecnicoId = tipoTecnicoId
     )
 }

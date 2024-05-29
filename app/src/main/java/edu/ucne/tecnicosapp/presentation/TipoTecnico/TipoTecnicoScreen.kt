@@ -67,7 +67,6 @@ fun TipoTecnicoBody(
     onDeleteTipoTecnico: () -> Unit
 ) {
     val context = LocalContext.current
-    var guardarVarios by remember { mutableStateOf(false) }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),

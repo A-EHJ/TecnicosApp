@@ -1,4 +1,4 @@
-package com.ucne.myapplication.data.local.dao
+package edu.ucne.tecnicosapp.data.local.dao
 
 import androidx.room.Dao
 import androidx.room.Delete

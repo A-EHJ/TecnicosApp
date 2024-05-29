@@ -32,7 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import edu.ucne.tecnicosapp.data.local.entities.TipoTecnicoEntity
-import edu.ucne.tecnicosapp.presentation.Component.DropDownInput
+import edu.ucne.tecnicosapp.presentation.Component.DropDownInput2
 import edu.ucne.tecnicosapp.ui.theme.TecnicosAppTheme
 
 
@@ -123,14 +123,16 @@ fun TecnicoBody(
                     Text(text = uiState.sueldoError ?: "", color = Color.Red)
                 }
 
-                DropDownInput(
+
+                DropDownInput2(
                     items = tipoTecnico,
                     label = "Tipos Técnico",
                     itemToString = { it.descripcion},
                     onItemSelected = {
                         onTipoTecnicoChanged(it.descripcion)
                     },
-                    selectedItem = uiState.tipoTecnico ?: "",
+                    itemToId = { it.tipoTecnicoId },
+                    selectedItemId = uiState.tipoTecnicoId,
                     isError = !uiState.tipoTecnicoError.isNullOrEmpty()
                 )
                 if (!uiState.tipoTecnicoError.isNullOrEmpty()) {

@@ -1,6 +1,6 @@
 package edu.ucne.tecnicosapp.data.repository
 
-import com.ucne.myapplication.data.local.dao.TecnicoDao
+import edu.ucne.tecnicosapp.data.local.dao.TecnicoDao
 import edu.ucne.tecnicosapp.data.local.entities.TecnicoEntity
 
 class TecnicoRepository(private val tecnicoDao: TecnicoDao) {
