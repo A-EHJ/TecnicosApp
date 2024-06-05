@@ -56,8 +56,8 @@ fun TecnicoScreen(
             tecnicoViewModel.saveTecnico()
         },
         onDeleteTecnico = tecnicoViewModel::deleteTecnico,
-        tipoTecnico = tipos,
-           onTipoTecnicoChanged = tecnicoViewModel::onTipoTecnicoChanged
+        tiposTecnicos = tipos,
+        onTipoTecnicoChanged = tecnicoViewModel::onTipoTecnicoChanged
 
 
     )
@@ -72,8 +72,8 @@ fun TecnicoBody(
     onVolver: () -> Unit,
     onSaveTecnico: () -> Unit,
     onDeleteTecnico: () -> Unit,
-    tipoTecnico: List<TipoTecnicoEntity>,
-    onTipoTecnicoChanged: (String)-> Unit
+    tiposTecnicos: List<TipoTecnicoEntity>,
+    onTipoTecnicoChanged: (Int) -> Unit
 ) {
     val context = LocalContext.current
 
@@ -125,16 +125,17 @@ fun TecnicoBody(
 
 
                 DropDownInput2(
-                    items = tipoTecnico,
+                    items = tiposTecnicos,
                     label = "Tipos Técnico",
-                    itemToString = { it.descripcion},
+                    itemToString = { it.descripcion },
                     onItemSelected = {
-                        onTipoTecnicoChanged(it.descripcion)
+                        onTipoTecnicoChanged(it.tipoTecnicoId ?: 0)
                     },
                     itemToId = { it.tipoTecnicoId },
                     selectedItemId = uiState.tipoTecnicoId,
                     isError = !uiState.tipoTecnicoError.isNullOrEmpty()
                 )
+
                 if (!uiState.tipoTecnicoError.isNullOrEmpty()) {
                     Text(text = uiState.tipoTecnicoError ?: "", color = Color.Red)
                 }
@@ -175,7 +176,7 @@ fun TecnicoBody(
                     OutlinedButton(
                         onClick = {
                             onSaveTecnico()
-                            if (uiState.guardo || (!uiState.nombresError.isNullOrEmpty() || !uiState.sueldoError.isNullOrEmpty())) {
+                            if (uiState.guardo && uiState.nombresError.isNullOrEmpty() && uiState.sueldoError.isNullOrEmpty()) {
                                 if (uiState.tecnicoId != 0) {
 
                                     Toast.makeText(
@@ -188,9 +189,10 @@ fun TecnicoBody(
                                     Toast.makeText(context, "Tecnico agregado", Toast.LENGTH_SHORT)
                                         .show()
                                 }
-                                onVolver()
                                 limpiarTecnico()
+                                onVolver()
                             }
+
                         }
                     ) {
                         if (uiState.tecnicoId == 0 || uiState.tecnicoId == null) {
@@ -225,7 +227,7 @@ private fun PreviewTecnicoBody() {
             onVolver = {},
             onSaveTecnico = {},
             onDeleteTecnico = {},
-            tipoTecnico = listOf(),
+            tiposTecnicos = listOf(),
             onTipoTecnicoChanged = {}
         )
     }

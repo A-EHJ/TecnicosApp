@@ -22,9 +22,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -131,14 +128,21 @@ fun TipoTecnicoBody(
                     OutlinedButton(
                         onClick = {
                             onSaveTipoTecnico()
-                            if (uiState.descripcionError.isNullOrEmpty()){
-                                if (uiState.tipoTecnicoId == 0 || uiState.tipoTecnicoId == null) {
-                                    Toast.makeText(context, "Tecnico agregado", Toast.LENGTH_SHORT)
+
+                            if (uiState.guardo && uiState.descripcionError.isNullOrEmpty()) {
+                                if (uiState.tipoTecnicoId != 0) {
+
+                                    Toast.makeText(
+                                        context,
+                                        "Tecnico actualizado",
+                                        Toast.LENGTH_SHORT
+                                    )
                                         .show()
                                 } else {
-                                    Toast.makeText(context, "Tecnico actualizado", Toast.LENGTH_SHORT)
+                                    Toast.makeText(context, "Tecnico agregado", Toast.LENGTH_SHORT)
                                         .show()
                                 }
+                                limpiarTipoTecnico()
                                 onVolver()
                             }
                         }

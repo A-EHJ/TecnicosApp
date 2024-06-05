@@ -35,9 +35,9 @@ class TecnicoViewModel(private val tecnicorepository: TecnicoRepository, private
             initialValue = emptyList()
         )
 
-    fun onTipoTecnicoChanged(tipoTecnico: String) {
+    fun onTipoTecnicoChanged(tipoTecnicoId: Int) {
         uiState.update {
-            it.copy(tipoTecnico = tipoTecnico)
+            it.copy(tipoTecnicoId = tipoTecnicoId)
         }
     }
 
@@ -95,10 +95,7 @@ class TecnicoViewModel(private val tecnicorepository: TecnicoRepository, private
     }
 
     fun saveTecnico() {
-        // Reset errors
-        uiState.update {
-            it.copy(nombresError = null, sueldoError = null)
-        }
+
 
         // Update tecnicoId if it's 0
         if (uiState.value.tecnicoId == 0) {
@@ -129,14 +126,21 @@ class TecnicoViewModel(private val tecnicorepository: TecnicoRepository, private
         }
 
         // Validate tipoTecnico
-        if (uiState.value.tipoTecnico.isNullOrEmpty()) {
+        if (uiState.value.tipoTecnicoId == 0 || uiState.value.tipoTecnicoId == null) {
             uiState.update {
                 it.copy(tipoTecnicoError = "El tipo no puede estar vacío")
             }
+            valido = false
         }
 
-
-
+        if (valido) {
+            uiState.update {
+                it.copy(nombresError = null, sueldoError = null)
+            }
+        }
+        else{
+            return
+        }
 
         viewModelScope.launch {
 
@@ -156,10 +160,6 @@ class TecnicoViewModel(private val tecnicorepository: TecnicoRepository, private
             // Update guardo
             uiState.update {
                 it.copy(guardo = true)
-            }
-
-            uiState.update {
-                it.copy(tipoTecnicoId = tipoTecnicoRepository.getTipoTecnicoId(uiState.value.tipoTecnico ?: ""))
             }
 
             // Proceed to save if there are no errors
@@ -190,7 +190,6 @@ data class TecnicoUIState(
     var nombresError: String? = null,
     var sueldoHora: Double? = 0.0,
     var sueldoError: String? = null,
-    var tipoTecnico: String? = "",
     var tipoTecnicoId: Int? = null,
     var tipoTecnicoError: String? = "",
     var guardo: Boolean = false

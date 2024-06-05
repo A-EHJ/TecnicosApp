@@ -69,13 +69,8 @@ class TipoTecnicoViewModel(
     }
 
 
-
-
     fun saveTipoTecnico() {
-        // Reset errors
-        uiState.update {
-            it.copy( descripcionError = null)
-        }
+
 
         // Update tecnicoId if it's 0
         if (uiState.value.tipoTecnicoId == 0) {
@@ -84,18 +79,21 @@ class TipoTecnicoViewModel(
             }
         }
 
-
-
         var valido = true
 
         // Validate nombres
-        if (uiState.value.descripcion.isEmpty()) {
+        if (uiState.value.descripcion.isNullOrEmpty() || uiState.value.descripcion.isBlank() || uiState.value.descripcion == ""){
             uiState.update {
-                it.copy(descripcionError = "El nombre no puede estar vacío")
+                it.copy(descripcionError = "La descripción no puede estar vacío")
             }
-            valido = false
+            return
         }
 
+        if (valido){
+            uiState.update {
+                it.copy(descripcionError = null)
+            }
+        }
 
         viewModelScope.launch {
             if (!descripcionTipoTecnicoExiste()) {
@@ -125,7 +123,10 @@ class TipoTecnicoViewModel(
 
 
     suspend fun descripcionTipoTecnicoExiste(): Boolean {
-        val tecnico = tipoTecnicorepository.getTipoTecnico(uiState.value.descripcion, uiState.value.tipoTecnicoId ?: 0)
+        val tecnico = tipoTecnicorepository.getTipoTecnico(
+            uiState.value.descripcion,
+            uiState.value.tipoTecnicoId ?: 0
+        )
         return tecnico == null
     }
 
