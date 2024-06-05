@@ -51,6 +51,11 @@ fun NavigationDrawer(
             title = "Tipo Técnico",
             selectedIcon = Icons.Filled.Info,
             unselectedIcon = Icons.Outlined.Info
+        ),
+        NavigationItem(
+            title = "Servicios",
+            selectedIcon = Icons.Filled.Info,
+            unselectedIcon = Icons.Outlined.Info
         )
     )
     val selectedItem = remember { mutableStateOf(items[0]) }
@@ -78,6 +83,7 @@ fun NavigationDrawer(
                             when (item.title) {
                                 "Tecnicos" -> navController.navigate(Screen.TecnicoList)
                                 "Tipo Técnico" -> navController.navigate(Screen.TipoTecnicoList)
+                                "Servicios" -> navController.navigate(Screen.ServicioList)
                             }
                         },
                         modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)

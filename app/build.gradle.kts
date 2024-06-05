@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.android)
     id("com.google.devtools.ksp") //Todo: 1. Investigar ksp
     alias(libs.plugins.kotlinx.serialization)
+    id("org.jetbrains.kotlin.plugin.compose")
 }
 
 android {
